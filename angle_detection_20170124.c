@@ -547,6 +547,7 @@ void elevation(char *sen_mag_file, char *mag_file, char *norm_file, char *motor_
 void orientation(char *mag_file, char *sen_acc_file, char *mag_file_2){
   int cnt_acc = 0;
   int cnt_ext_max_time = 0;
+  int cnt_mag_data = 0;
   double h_time = 0;
   double h_x = 0;
   double h_y = 0;
@@ -623,7 +624,7 @@ void orientation(char *mag_file, char *sen_acc_file, char *mag_file_2){
   rotate_y(mag_x, mag_y, mag_z, mag_data_number, beta);//y軸を中心に回転させる
 
   file_write(&fp_mag_2, mag_file_2);
-  int cnt_mag_data = 0;
+
   for(cnt_mag_data=0; cnt_mag_data<mag_data_number; cnt_mag_data++){
     fprintf(fp_mag_2, "%lf,%lf,%lf,%lf\n", mag_unixtime[cnt_mag_data],mag_x[cnt_mag_data], mag_y[cnt_mag_data], mag_z[cnt_mag_data]);
   }
@@ -644,8 +645,20 @@ void orientation(char *mag_file, char *sen_acc_file, char *mag_file_2){
 
   fclose(fp_mag_2);
 
-  printf("Hx:%lf Hy:%lf\n", h_x_after, h_y_after);
+  printf("\nHx:%lf Hy:%lf\n", h_x_after, h_y_after);
 
+  cos_gamma = ( 1/sqrt(pow(h_x_after,2) + pow(h_y_after,2)) )*(h_x_after);
+  gamma = acos(cos_gamma);
+  printf("cos_gamma:%lf gamma:%lf[radian] gamma:%lf[degree]\n", cos_gamma, gamma, radian_to_degree(gamma));
+
+  rotate_z(mag_x, mag_y, mag_z, mag_data_number, gamma);//xz軸を中心に回転させる
+
+  file_write(&fp_mag_2, mag_file_2);
+
+  for(cnt_mag_data=0; cnt_mag_data<mag_data_number; cnt_mag_data++){
+    fprintf(fp_mag_2, "%lf,%lf,%lf,%lf\n", mag_unixtime[cnt_mag_data],mag_x[cnt_mag_data], mag_y[cnt_mag_data], mag_z[cnt_mag_data]);
+  }
+  fclose(fp_mag_2);
 
 
   return;
